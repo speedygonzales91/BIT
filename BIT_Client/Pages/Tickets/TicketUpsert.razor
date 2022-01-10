@@ -1,0 +1,164 @@
+﻿@page "/tickets/create"
+@page "/tickets/edit/{Id:int}"
+
+@inject ITicketService TicketService
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
+
+<MudContainer Class="m-1">
+    <MudText Typo="Typo.h3">@Title Ticket</MudText>
+
+    <EditForm Model="@TicketModel" OnValidSubmit="HandleTicketUpsert">
+        <DataAnnotationsValidator />
+        <MudCard>
+            <MudCardContent>
+                <MudTextField Label="Cím" HelperText="Max. 256 characters"
+                              @bind-Value="@TicketModel.Title" For="@(() => TicketModel.Title)" />
+                <MudTextField Label="Felelős" Class="mt-3"
+                              @bind-Value="TicketModel.AssignedTo" For="@(() => TicketModel.AssignedTo)" />
+
+                <MudSelect @bind-Value="TicketModel.Priority" Label="Prioritás" Strict="true"
+                           Variant="Variant.Outlined" Format="F2" AnchorOrigin="Origin.BottomCenter"
+                           Required="true" Class="mt-5">
+                    <MudSelectItem Value="@("Alacsony")" />
+                    <MudSelectItem Value="@("Közepes")" />
+                    <MudSelectItem Value="@("Magas")" />
+                    <MudSelectItem Value="@("Kritikus")" />
+                </MudSelect>
+
+                <MudSelect @bind-Value="TicketModel.Status" Label="Státusz" Strict="true"
+                           Variant="Variant.Outlined" Format="F2" AnchorOrigin="Origin.BottomCenter"
+                           Required="true" Class="mt-5">
+                    <MudSelectItem Value="@("Nyitott")" />
+                    <MudSelectItem Value="@("Folyamatban")" />
+                    <MudSelectItem Value="@("Lezárt")" />
+                    <MudSelectItem Value="@("Újranyitott")" />
+                </MudSelect>
+
+                <div class="form-group" style="margin-top: 20px; display: block;">
+                    <BlazoredTextEditor @ref="@QuillHtml" Placeholder="Ticket leírás">
+                        <ToolbarContent>
+                            <select class="ql-header">
+                                <option selected=""></option>
+                                <option value="1"></option>
+                                <option value="2"></option>
+                                <option value="3"></option>
+                                <option value="4"></option>
+                                <option value="5"></option>
+                            </select>
+                            <span class="ql-formats">
+                                <button class="ql-bold"></button>
+                                <button class="ql-italic"></button>
+                                <button class="ql-underline"></button>
+                                <button class="ql-strike"></button>
+                            </span>
+                            <span class="ql-formats">
+                                <select class="ql-color"></select>
+                                <select class="ql-background"></select>
+                            </span>
+                            <span class="ql-formats">
+                                <button class="ql-list" value="ordered"></button>
+                                <button class="ql-list" value="bullet"></button>
+                            </span>
+                            <span class="ql-formats">
+                                <button class="ql-link"></button>
+                            </span>
+                        </ToolbarContent>
+                        <EditorContent>
+                        </EditorContent>
+                    </BlazoredTextEditor>
+                </div>
+
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton EndIcon="@Icons.Filled.Save" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Mentés</MudButton>
+            </MudCardActions>
+        </MudCard>
+        @*        <MudText Typo="Typo.body2" Align="Align.Center" Class="my-4">
+            Fill out the form correctly to see the success message.
+            </MudText>*@
+    </EditForm>
+</MudContainer>
+
+
+
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private string Title { get; set; } = "Új";
+
+    private TicketDTO TicketModel { get; set; } = new TicketDTO();
+    public BlazoredTextEditor QuillHtml { get; set; } = new BlazoredTextEditor();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id is null)
+        {
+            TicketModel = new TicketDTO();
+            TicketModel.Status = "Nyitott";
+        }
+        else
+        {
+            //updating
+            Title = "Frissítés";
+            TicketModel = await TicketService.GetTicket(Id.Value);
+        }
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        if (!firstRender)
+        {
+            bool loading = true;
+            while (loading)
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(TicketModel.Description))
+                    {
+                        await this.QuillHtml.LoadHTMLContent(TicketModel.Description);
+                    }
+                    loading = false;
+                }
+                catch (Exception ex)
+                {
+                    await Task.Delay(100);
+                    loading = true;
+                }
+            }
+        }
+        else
+        {
+            //await this.QuillHtml.LoadHTMLContent(TicketModel.Description);
+        }
+    }
+
+
+    protected async Task HandleTicketUpsert()
+    {
+        try
+        {
+            if (TicketModel.Id != 0 && Title == "Frissítés")
+            {
+                TicketModel.Description = await this.QuillHtml.GetHTML();
+                await TicketService.UpdateTicket(TicketModel.Id, TicketModel);
+            }
+            else
+            {
+                TicketModel.Description = await this.QuillHtml.GetHTML();
+                await TicketService.CreateTicket(TicketModel);
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
+
+        NavigationManager.NavigateTo("tickets");
+    }
+}

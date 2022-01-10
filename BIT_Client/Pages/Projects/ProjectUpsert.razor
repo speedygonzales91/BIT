@@ -1,0 +1,72 @@
+﻿@page "/projects/create"
+@page "/projects/edit/{Id:int}"
+
+@inject IProjectService ProjectService
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
+
+<MudContainer Class="m-1">
+    <MudText Typo="Typo.h3">Projekt @Title</MudText>
+
+    <EditForm Model="@ProjectModel" OnValidSubmit="HandleProjectUpsert">
+        <DataAnnotationsValidator />
+        <MudCard>
+            <MudCardContent>
+                <MudTextField Label="Projekt név" HelperText="Max. 256 characters"
+                              @bind-Value="@ProjectModel.Name" For="@(() => ProjectModel.Name)" />
+ 
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton EndIcon="@Icons.Filled.Save" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Mentés</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </EditForm>
+</MudContainer>
+
+
+
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private string Title { get; set; } = "Létrehozás";
+
+    private ProjectDTO ProjectModel { get; set; } = new ProjectDTO();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id is null)
+        {
+            ProjectModel = new ProjectDTO();
+        }
+        else
+        {
+            //updating
+            Title = "Frissítés";
+            ProjectModel = await ProjectService.GetProject(Id.Value);
+        }
+    }
+
+
+
+    protected async Task HandleProjectUpsert()
+    {
+        try
+        {
+            if (ProjectModel.Id != 0 && Title == "Frissítés")
+            {
+                await ProjectService.UpdateProject(Id.Value, ProjectModel);
+            }
+            else
+            {
+                await ProjectService.CreateProject(ProjectModel);
+            }
+        }
+        catch (Exception ex)
+        {
+        }
+
+        NavigationManager.NavigateTo("projects");
+    }
+}

@@ -1,0 +1,71 @@
+﻿@page "/tickets"
+
+@inject NavigationManager NavigationManager
+@inject ITicketService TicketService
+
+@if (Tickets != null && Tickets.Any())
+{
+    <MudContainer Class="mt-4 px-8 h-100" MaxWidth="MaxWidth.False">
+        <MudItem xs="12" sm="12" md="12" Class="text-end">
+            <MudButton EndIcon="@Icons.Filled.AddCircleOutline" Variant="Variant.Filled" OnClick="CreateNewTicket">Új jegy</MudButton>
+        </MudItem>
+        <MudItem Class="mt-4" xs="12" sm="12" md="12">
+            <MudTable Items="Tickets">
+                <HeaderContent>
+                    <MudTh>Id</MudTh>
+                    <MudTh>Utoljára frissítve</MudTh>
+                    <MudTh>Cím</MudTh>
+                    <MudTh>Státusz</MudTh>
+                    <MudTh>Prioritás</MudTh>
+                    <MudTh>Műveletek</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Id">@context.Id</MudTd>
+                    <MudTd DataLabel="Utoljára frissítve">@context.UpdatedOn</MudTd>
+                    <MudTd DataLabel="Cím"><NavLink href=@($"tickets/{@context.Id}")>@context.Title <MudIcon Icon="@Icons.Filled.Preview"></MudIcon></NavLink> </MudTd>
+                    <MudTd DataLabel="Státusz">@context.Status</MudTd>
+                    <MudTd DataLabel="Prioritás">@context.Priority</MudTd>
+                    <MudTd>
+                        <MudButton EndIcon="@Icons.Filled.Edit" OnClick="()=>HandleEdit(context.Id)">Edit</MudButton>
+                        <MudButton EndIcon="@Icons.Filled.Delete" OnClick="()=>HandleDelete(context.Id)">Delete</MudButton>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+
+
+        </MudItem>
+    </MudContainer>
+}
+else
+{
+    <div style="position:fixed; top: 50%; left:50%;margin-top:-50px; margin-left:-100px;">
+        <img src="images/loader.gif" />
+    </div>
+}
+
+
+@code {
+    private IEnumerable<TicketDTO> Tickets = new List<TicketDTO>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Tickets = await TicketService.GetTickets();
+    }
+
+    private void CreateNewTicket()
+    {
+        NavigationManager.NavigateTo("tickets/create");
+    }
+
+    private async Task HandleDelete(int id)
+    {
+        await TicketService.DeleteTicket(id);
+
+        Tickets = await TicketService.GetTickets();
+    }
+
+    private async Task HandleEdit(int id)
+    {
+        NavigationManager.NavigateTo($"tickets/edit/{id}");
+    }
+}

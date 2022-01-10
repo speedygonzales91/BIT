@@ -1,0 +1,103 @@
+﻿@page "/tickets/{Id:int}"
+
+@inject ITicketService TicketService
+
+<MudContainer Class="m-2">
+    <MudGrid>
+        <MudItem xs="8">
+            <MudPaper Class="h-100">
+                <MudText Typo="Typo.h4">@TicketModel.Title</MudText>
+                <hr style="width:75%; text-align:center;" />
+                <MudText Typo="Typo.h6">Leírás:</MudText>
+                <MudText Align="Align.Left">@((MarkupString)TicketModel.Description)</MudText>
+            </MudPaper>
+        </MudItem>
+
+
+        <MudItem xs="4">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudPaper Class="d-flex align-center justify-center">
+                        <MudList Clickable="true">
+                            <MudListItem Icon="@Icons.Filled.Edit">
+                                Edit
+                            </MudListItem>
+                        </MudList>
+                        <MudList Clickable="true">
+                            <MudListItem Icon="@Icons.Filled.FormatListBulleted" Text="Műveletek">
+                                <NestedList>
+                                    <MudListItem Icon="@Icons.Material.Filled.StarRate">
+                                        Star
+                                    </MudListItem>
+                                    <MudListItem Icon="@Icons.Material.Filled.Delete">
+                                        Delete
+                                    </MudListItem>
+                                </NestedList>
+                            </MudListItem>
+                        </MudList>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudPaper Class="mud-width-full py-8">
+                        <MudText Typo="Typo.h6">Ticket részletek:</MudText>
+                        <MudText Align="Align.Left"><b>Id:</b> @TicketModel.Id</MudText>
+                        <MudText Align="Align.Left"><b>Létrehozva:</b> @TicketModel.CreatedOn</MudText>
+                        <MudText Align="Align.Left"><b>Létrehozta:</b> @TicketModel.CreatedBy</MudText>
+                        <MudText Align="Align.Left"><b>Legutoljára frissítve:</b> @TicketModel.UpdatedOn</MudText>
+                        <MudText Align="Align.Left"><b>Legutoljára frissítette:</b> @TicketModel.UpdatedBy</MudText>
+                        <MudText Align="Align.Left"><b>Kommentek száma:</b> 3</MudText>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+    </MudGrid>
+
+    <MudGrid>
+        <MudItem xs="8">
+            <MudText Typo="Typo.h6">Kommentek:</MudText>
+
+            <MudCard Outlined="true">
+                <MudCardContent>
+                    <MudText>Story of the day</MudText>
+                    <MudText Typo="Typo.body2">The quick, brown fox jumps over a lazy dog.</MudText>
+                </MudCardContent>
+            </MudCard>
+
+            <MudCard Outlined="true">
+                <MudCardContent>
+                    <MudText>Story of the day</MudText>
+                    <MudText Typo="Typo.body2">The quick, brown fox jumps over a lazy dog.</MudText>
+                </MudCardContent>
+            </MudCard>
+
+        </MudItem>
+        <MudItem xs="4">
+            <MudText Typo="Typo.h6" GutterBottom="true">Icons with text</MudText>
+            <MudPaper Width="100%">
+                <MudList Clickable=true Dense=true>
+                    <MudListItem Text="Commit1" Icon="@Icons.Filled.Bookmark" />
+                    <MudListItem Text="Commit2" Icon="@Icons.Filled.Bookmark" IconColor="Color.Primary" />
+                    <MudListItem Text="Commit3" Icon="@Icons.Filled.Bookmark" IconColor="Color.Secondary" />
+                </MudList>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private TicketDTO TicketModel { get; set; } = new TicketDTO();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != null)
+        {
+            TicketModel = await TicketService.GetTicket(Id.Value);
+        }
+
+    }
+}
