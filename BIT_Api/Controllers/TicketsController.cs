@@ -23,6 +23,17 @@ namespace BIT_Api.Controllers
             return Ok(allTickets);
         }
 
+        [HttpGet("{parentTicketId}")]
+        public async Task<IActionResult> GetChildrenTickets(int? parentTicketId)
+        {
+            if (parentTicketId is null)
+            {
+                return BadRequest(new ErrorModel { ErrorMessage = "Parent Ticket Id cannot be null" });
+            }
+            var childrenTickets = await _ticketRepository.GetChildrenTickets(parentTicketId.Value);
+            return Ok(childrenTickets);
+        }
+
         [HttpGet("{ticketId}")]
         public async Task<IActionResult> GetTicket(int? ticketId)
         {

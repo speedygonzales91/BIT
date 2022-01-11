@@ -2,6 +2,7 @@
 using BIT_Business.Repository.IRepository;
 using BIT_DataAccess.Data;
 using BIT_Models;
+using Html2Markdown;
 using Microsoft.EntityFrameworkCore;
 
 namespace BIT_Business.Repository
@@ -27,6 +28,7 @@ namespace BIT_Business.Repository
                 ticket.CreatedOn = now;
                 ticket.UpdatedBy = "";
                 ticket.UpdatedOn = now;
+                ticket.Description = new Html2Markdown.Converter().Convert(ticketDTO.Description);
                 var addedTicket = await _db.Tickets.AddAsync(ticket);
                 await _db.SaveChangesAsync();
 
@@ -66,6 +68,19 @@ namespace BIT_Business.Repository
             }
         }
 
+        public async Task<IEnumerable<TicketDTO>> GetChildrenTickets(int parentTicketId)
+        {
+            try
+            {
+                IEnumerable<TicketDTO> ticketDTOs = _mapper.Map<IEnumerable<Ticket>, IEnumerable<TicketDTO>>(await _db.Tickets.Where(x=>x.ParentId == parentTicketId).ToListAsync());
+                return ticketDTOs.ToList();
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
         public async Task<TicketDTO> GetTicket(int ticketId)
         {
             try
@@ -89,6 +104,7 @@ namespace BIT_Business.Repository
                     var ticket = _mapper.Map<TicketDTO, Ticket>(ticketDTO, ticketDetail);
                     ticket.UpdatedBy = "";
                     ticket.UpdatedOn = DateTime.Now;
+                    ticket.Description = new Html2Markdown.Converter().Convert(ticketDTO.Description);
                     var updatedTicket = _db.Tickets.Update(ticket);
                     await _db.SaveChangesAsync();
 

@@ -9,5 +9,6 @@ namespace BIT_Business.Repository.IRepository
         public Task<int> DeleteTicket(int ticketId);
         public Task<TicketDTO> GetTicket(int ticketId);
         public Task<IEnumerable<TicketDTO>> GetAllTickets();
+        public Task<IEnumerable<TicketDTO>> GetChildrenTickets(int parentTicketId);
     }
 }
