@@ -3,48 +3,40 @@
 @inject NavigationManager NavigationManager
 @inject IProjectService ProjectService
 
-@if(Projects != null && Projects.Any())
-{
-    <MudContainer Class="mt-4 px-8 h-100" MaxWidth="MaxWidth.False">
-    <MudItem xs="12" sm="12" md="12" Class="text-end">
-        <MudButton EndIcon="@Icons.Filled.AddCircleOutline" Variant="Variant.Filled" OnClick="CreateNewProject">Új Projekt</MudButton>
-    </MudItem>
-    <MudItem Class="mt-4" xs="12" sm="12" md="12">
-        <MudTable Items="Projects">
-            <HeaderContent>
-                <MudTh>Id</MudTh>
-                <MudTh>Projekt név</MudTh>
-                <MudTh>Jegyek (%)</MudTh>
-                <MudTh>Műveletek</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd DataLabel="Id">@context.Id</MudTd>
-                <MudTd DataLabel="Projekt név">@context.Name</MudTd>
-                <MudTd DataLabel="Jegyek (%)">@context.TicketPercentage</MudTd>
-                <MudTd DataLabel="Műveletek">
+ <MudContainer Class="mt-4 px-8 h-100" MaxWidth="MaxWidth.False">
+    @if (Projects != null)
+    {
+        <MudItem xs="12" sm="12" md="12" Class="text-end">
+            <MudButton EndIcon="@Icons.Filled.AddCircleOutline" Variant="Variant.Filled" OnClick="CreateNewProject">Új Projekt</MudButton>
+        </MudItem>
+        <MudItem Class="mt-4" xs="12" sm="12" md="12">
+            <MudTable Items="Projects">
+                <HeaderContent>
+                    <MudTh>Id</MudTh>
+                    <MudTh>Projekt név</MudTh>
+                    <MudTh>Jegyek (%)</MudTh>
+                    <MudTh>Műveletek</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Id">@context.Id</MudTd>
+                    <MudTd DataLabel="Projekt név">@context.Name</MudTd>
+                    <MudTd DataLabel="Jegyek (%)">@context.TicketPercentage</MudTd>
+                    <MudTd DataLabel="Műveletek">
+                        <MudButton EndIcon="@Icons.Filled.Edit" OnClick="()=>HandleEdit(context.Id)">Edit</MudButton>
+                        <MudButton EndIcon="@Icons.Filled.Delete" OnClick="()=>HandleDelete(context.Id)">Delete</MudButton>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudItem>
 
-@*                    <MudButton OnClick="()=>HandleEdit(context.Id)">Edit <i class="far fa-edit"></i> </MudButton>
-                    <MudButton OnClick="()=>HandleDelete(context.Id)">Delete <i class="far fa-trash-alt"></i> </MudButton>*@
-
-                    <MudButton EndIcon="@Icons.Filled.Edit" OnClick="()=>HandleEdit(context.Id)">Edit</MudButton>
-                    <MudButton EndIcon="@Icons.Filled.Delete" OnClick="()=>HandleDelete(context.Id)">Delete</MudButton>
-
-                </MudTd>
-            </RowTemplate>
-        </MudTable>
-
-
-    </MudItem>
+    }
+    else
+    {
+        <div style="position:fixed; top: 50%; left:50%;margin-top:-50px; margin-left:-100px;">
+            <img src="images/loader.gif" />
+        </div>
+    }
 </MudContainer>
-}
-else
-{
-    <div style="position:fixed; top: 50%; left:50%;margin-top:-50px; margin-left:-100px;">
-        <img src="images/loader.gif" />
-    </div>
-}
-
-
 
 
 @code {
@@ -59,11 +51,11 @@ else
     {
         NavigationManager.NavigateTo("projects/create");
     }
-    
+
     private async Task HandleDelete(int id)
     {
         await ProjectService.DeleteProject(id);
-        
+
         Projects = await ProjectService.GetProjects();
     }
 

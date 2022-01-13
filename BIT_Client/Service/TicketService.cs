@@ -105,5 +105,23 @@ namespace BIT_Client.Service
                 throw new Exception(contentTemp);
             }
         }
+
+        public async Task<IEnumerable<TicketDTO>> GetChildrenTickets(int parentTicketId)
+        {
+            var response = await _client.GetAsync($"api/tickets/getchildrentickets/{parentTicketId}");
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+
+                var childrenTickets = JsonConvert.DeserializeObject<IEnumerable<TicketDTO>>(content);
+                return childrenTickets;
+            }
+            else
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var error = JsonConvert.DeserializeObject<ErrorModel>(content);
+                throw new Exception(error.ErrorMessage);
+            }
+        }
     }
 }

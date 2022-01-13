@@ -3,53 +3,62 @@
 @inject NavigationManager NavigationManager
 @inject ITicketService TicketService
 
-@if (Tickets != null && Tickets.Any())
-{
-    <MudContainer Class="mt-4 px-8 h-100" MaxWidth="MaxWidth.False">
-        <MudItem xs="12" sm="12" md="12" Class="text-end">
-            <MudButton EndIcon="@Icons.Filled.AddCircleOutline" Variant="Variant.Filled" OnClick="CreateNewTicket">Új jegy</MudButton>
-        </MudItem>
-        <MudItem Class="mt-4" xs="12" sm="12" md="12">
-            <MudTable Items="Tickets">
-                <HeaderContent>
-                    <MudTh>Id</MudTh>
-                    <MudTh>Utoljára frissítve</MudTh>
-                    <MudTh>Cím</MudTh>
-                    <MudTh>Státusz</MudTh>
-                    <MudTh>Prioritás</MudTh>
-                    <MudTh>Műveletek</MudTh>
-                </HeaderContent>
-                <RowTemplate>
-                    <MudTd DataLabel="Id">@context.Id</MudTd>
-                    <MudTd DataLabel="Utoljára frissítve">@context.UpdatedOn</MudTd>
-                    <MudTd DataLabel="Cím"><NavLink href=@($"tickets/{@context.Id}")>@context.Title <MudIcon Icon="@Icons.Filled.Preview"></MudIcon></NavLink> </MudTd>
-                    <MudTd DataLabel="Státusz">@context.Status</MudTd>
-                    <MudTd DataLabel="Prioritás">@context.Priority</MudTd>
-                    <MudTd>
-                        <MudButton EndIcon="@Icons.Filled.Edit" OnClick="()=>HandleEdit(context.Id)">Edit</MudButton>
-                        <MudButton EndIcon="@Icons.Filled.Delete" OnClick="()=>HandleDelete(context.Id)">Delete</MudButton>
-                    </MudTd>
-                </RowTemplate>
-            </MudTable>
-
-
-        </MudItem>
-    </MudContainer>
-}
-else
+@if (IsLoading)
 {
     <div style="position:fixed; top: 50%; left:50%;margin-top:-50px; margin-left:-100px;">
         <img src="images/loader.gif" />
     </div>
 }
+else
+{
+
+    <MudContainer Class="mt-4 px-8 h-100" MaxWidth="MaxWidth.False">
+        <MudItem xs="12" sm="12" md="12" Class="text-end">
+            <MudButton EndIcon="@Icons.Filled.AddCircleOutline" Variant="Variant.Filled" OnClick="CreateNewTicket">Új jegy</MudButton>
+        </MudItem>
+        <MudItem Class="mt-4" xs="12" sm="12" md="12">
+            @if (Tickets != null)
+            {
+                <MudTable Items="Tickets">
+                    <HeaderContent>
+                        <MudTh>Id</MudTh>
+                        <MudTh>Utoljára frissítve</MudTh>
+                        <MudTh>Cím</MudTh>
+                        <MudTh>Státusz</MudTh>
+                        <MudTh>Prioritás</MudTh>
+                        <MudTh>Műveletek</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Id">@context.Id</MudTd>
+                        <MudTd DataLabel="Utoljára frissítve">@context.UpdatedOn</MudTd>
+                        <MudTd DataLabel="Cím"><NavLink href=@($"tickets/{@context.Id}")>@context.Title <MudIcon Icon="@Icons.Filled.Preview"></MudIcon></NavLink> </MudTd>
+                        <MudTd DataLabel="Státusz">@context.Status</MudTd>
+                        <MudTd DataLabel="Prioritás">@context.Priority</MudTd>
+                        <MudTd>
+                            <MudButton EndIcon="@Icons.Filled.Edit" OnClick="()=>HandleEdit(context.Id)">Edit</MudButton>
+                            <MudButton EndIcon="@Icons.Filled.Delete" OnClick="()=>HandleDelete(context.Id)">Delete</MudButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+
+
+        </MudItem>
+    </MudContainer>
+
+}
+
 
 
 @code {
+    public bool IsLoading { get; set; } = true;
     private IEnumerable<TicketDTO> Tickets = new List<TicketDTO>();
 
     protected override async Task OnInitializedAsync()
     {
+        IsLoading = true;
         Tickets = await TicketService.GetTickets();
+        IsLoading = false;
     }
 
     private void CreateNewTicket()

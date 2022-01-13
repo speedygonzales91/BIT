@@ -15,5 +15,6 @@ builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddMudServices();
 builder.Services.AddMudMarkdownServices();
+builder.Services.AddBlazorContextMenu();
 
 await builder.Build().RunAsync();
