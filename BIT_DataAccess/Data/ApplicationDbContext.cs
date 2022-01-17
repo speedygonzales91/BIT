@@ -13,5 +13,6 @@ namespace BIT_DataAccess.Data
         public DbSet<File> Files { get; set; }
 
         public DbSet<CommentFile> CommentFiles { get; set; }
+        public DbSet<CommentToTicket> CommentToTickets { get; set; }
     }
 }

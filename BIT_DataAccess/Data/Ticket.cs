@@ -7,6 +7,7 @@
         public string? Description { get; set; }
         public int? ProjectId { get; set; }
         public string Status { get; set; }
+        public string? StatusOfDevelopment { get; set; }
         public string AssignedTo { get; set; }
         public int? ParentId { get; set; }
         public DateTime CreatedOn { get; set; }

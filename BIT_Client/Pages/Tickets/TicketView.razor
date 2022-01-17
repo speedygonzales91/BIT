@@ -123,7 +123,7 @@
     void OnClick(ItemClickEventArgs e)
     {
         var literal = e.Data as string;
-        Console.WriteLine($"Item Clicked => Menu: {e.ContextMenuId}, Event: {e}");
+        Console.WriteLine($"Kijelölt szöveg: {SelectedText}");
     }
 
     async Task GetSelectedText()

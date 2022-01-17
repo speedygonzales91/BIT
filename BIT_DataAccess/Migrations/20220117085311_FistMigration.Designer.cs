@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BIT_DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220107124818_CommentFilesTáblaÁtnevezés")]
-    partial class CommentFilesTáblaÁtnevezés
+    [Migration("20220117085311_FistMigration")]
+    partial class FistMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -55,14 +55,14 @@ namespace BIT_DataAccess.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("CommitUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TicketId")
+                    b.Property<int?>("TicketId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -95,6 +95,31 @@ namespace BIT_DataAccess.Migrations
                     b.ToTable("CommentFiles");
                 });
 
+            modelBuilder.Entity("BIT_DataAccess.Data.CommentToTicket", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int?>("CommentId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TicketId")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommentId");
+
+                    b.HasIndex("TicketId");
+
+                    b.ToTable("CommentToTickets");
+                });
+
             modelBuilder.Entity("BIT_DataAccess.Data.File", b =>
                 {
                     b.Property<int>("Id")
@@ -103,8 +128,8 @@ namespace BIT_DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<DateTime?>("CreatedBy")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("CreatedOn")
                         .HasColumnType("datetime2");
@@ -180,6 +205,9 @@ namespace BIT_DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("StatusOfDevelopment")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -234,6 +262,25 @@ namespace BIT_DataAccess.Migrations
                     b.Navigation("Comment");
 
                     b.Navigation("File");
+                });
+
+            modelBuilder.Entity("BIT_DataAccess.Data.CommentToTicket", b =>
+                {
+                    b.HasOne("BIT_DataAccess.Data.Comment", "Comment")
+                        .WithMany()
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BIT_DataAccess.Data.Ticket", "Ticket")
+                        .WithMany()
+                        .HasForeignKey("TicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Comment");
+
+                    b.Navigation("Ticket");
                 });
 
             modelBuilder.Entity("BIT_DataAccess.Data.Ticket", b =>
