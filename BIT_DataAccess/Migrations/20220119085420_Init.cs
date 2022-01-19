@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace BIT_DataAccess.Migrations
 {
-    public partial class FistMigration : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -71,7 +71,8 @@ namespace BIT_DataAccess.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     TicketId = table.Column<int>(type: "int", nullable: false),
                     Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CommitUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    CommitUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Navigation = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -130,32 +131,6 @@ namespace BIT_DataAccess.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "CommentToTickets",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CommentId = table.Column<int>(type: "int", nullable: false),
-                    TicketId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CommentToTickets", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CommentToTickets_Comments_CommentId",
-                        column: x => x.CommentId,
-                        principalTable: "Comments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CommentToTickets_Tickets_TicketId",
-                        column: x => x.TicketId,
-                        principalTable: "Tickets",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Attachments_CommentId",
                 table: "Attachments",
@@ -175,16 +150,6 @@ namespace BIT_DataAccess.Migrations
                 name: "IX_Comments_TicketId",
                 table: "Comments",
                 column: "TicketId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CommentToTickets_CommentId",
-                table: "CommentToTickets",
-                column: "CommentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CommentToTickets_TicketId",
-                table: "CommentToTickets",
-                column: "TicketId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -196,16 +161,13 @@ namespace BIT_DataAccess.Migrations
                 name: "CommentFiles");
 
             migrationBuilder.DropTable(
-                name: "CommentToTickets");
-
-            migrationBuilder.DropTable(
                 name: "Projects");
 
             migrationBuilder.DropTable(
-                name: "Files");
+                name: "Comments");
 
             migrationBuilder.DropTable(
-                name: "Comments");
+                name: "Files");
 
             migrationBuilder.DropTable(
                 name: "Tickets");

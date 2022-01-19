@@ -14,5 +14,7 @@
         public DateTime? UpdatedOn { get; set; }
         public string? UpdatedBy { get; set; }
         public string? Priority { get; set; }
+
+        public virtual ICollection<CommentDTO> Comments { get; set; } = new List<CommentDTO>(); 
     }
 }

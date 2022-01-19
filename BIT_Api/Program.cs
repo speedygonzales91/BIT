@@ -1,5 +1,4 @@
-using BIT_Business.Repository;
-using BIT_Business.Repository.IRepository;
+
 using BIT_DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Serialization;
@@ -9,8 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-builder.Services.AddScoped<ITicketRepository, TicketRepository>();
-builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+
 
 builder.Services.AddCors(o => o.AddPolicy("BIT", builder =>
 {

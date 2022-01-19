@@ -1,4 +1,6 @@
-﻿using BIT_Business.Repository.IRepository;
+﻿using AutoMapper;
+using BIT_Api.Managers;
+using BIT_DataAccess.Data;
 using BIT_Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,18 +10,17 @@ namespace BIT_Api.Controllers
     [ApiController]
     public class TicketsController : ControllerBase
     {
-        private readonly ITicketRepository _ticketRepository;
+        private TicketsManager ticketsManager;
 
-        public TicketsController(ITicketRepository ticketRepository)
+        public TicketsController(ApplicationDbContext db, IMapper mapper)
         {
-            this._ticketRepository = ticketRepository;
+            ticketsManager = new TicketsManager(db, mapper);
         }
-
 
         [HttpGet]
         public async Task<IActionResult> GetAllTickets()
         {
-            var allTickets = await _ticketRepository.GetAllTickets();
+            var allTickets = await ticketsManager.GetAllTickets();
             return Ok(allTickets);
         }
 
@@ -30,7 +31,7 @@ namespace BIT_Api.Controllers
             {
                 return BadRequest(new ErrorModel { ErrorMessage = "Parent Ticket Id cannot be null" });
             }
-            var childrenTickets = await _ticketRepository.GetChildrenTickets(parentTicketId.Value);
+            var childrenTickets = await ticketsManager.GetChildrenTickets(parentTicketId.Value);
             return Ok(childrenTickets);
         }
 
@@ -42,7 +43,7 @@ namespace BIT_Api.Controllers
                 return BadRequest(new ErrorModel() { Title = "", ErrorMessage = "Invalid Ticket Id", StatusCode = StatusCodes.Status400BadRequest });
             }
 
-            var ticket = await _ticketRepository.GetTicket(ticketId.Value);
+            var ticket = await ticketsManager.GetTicket(ticketId.Value);
             if (ticket is null)
             {
                 return BadRequest(new ErrorModel() { Title = "", ErrorMessage = "Invalid Ticket Id", StatusCode = StatusCodes.Status404NotFound });
@@ -56,7 +57,7 @@ namespace BIT_Api.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _ticketRepository.CreateTicket(ticket);
+                var result = await ticketsManager.CreateTicket(ticket);
                 return Ok(result);
             }
             else
@@ -73,7 +74,7 @@ namespace BIT_Api.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _ticketRepository.UpdateTicket(ticketId, ticket);
+                var result = await ticketsManager.UpdateTicket(ticketId, ticket);
                 return Ok(result);
             }
             else
@@ -88,7 +89,7 @@ namespace BIT_Api.Controllers
         [HttpDelete]
         public async Task<IActionResult> Delete(int ticketId)
         {
-            var response = await _ticketRepository.DeleteTicket(ticketId);
+            var response = await ticketsManager.DeleteTicket(ticketId);
 
             if (response < 1)
             {

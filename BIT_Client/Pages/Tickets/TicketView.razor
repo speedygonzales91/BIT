@@ -2,8 +2,25 @@
 
 @inject ITicketService TicketService
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
 
-<MudContainer Class="m-2">
+
+@if (IsLoading)
+{
+    <div style="position:fixed; top: 50%; left:50%;margin-top:-50px; margin-left:-100px;">
+        <img src="images/loader.gif" />
+    </div>
+}
+else
+{
+    <MudContainer Class="m-2">
+
+<MudBreadcrumbs Items="_items" Style="@($"background-color:{Colors.Purple.Lighten5};")">
+    <ItemTemplate Context="item">
+        <MudLink Href="@item.Href">@item.Text.ToUpper()</MudLink>
+    </ItemTemplate>
+</MudBreadcrumbs>
+
     <MudGrid>
         <MudItem xs="8">
             <MudPaper Class="h-100">
@@ -41,12 +58,18 @@
                     <MudPaper Class="mud-width-full py-8">
                         <MudText Typo="Typo.h6">Ticket részletek:</MudText>
                         <MudText Align="Align.Left"><b>Id:</b> @TicketModel.Id</MudText>
+
                         <MudText Align="Align.Left"><b>Létrehozva:</b> @TicketModel.CreatedOn</MudText>
                         <MudText Align="Align.Left"><b>Létrehozta:</b> @TicketModel.CreatedBy</MudText>
                         <MudText Align="Align.Left"><b>Legutoljára frissítve:</b> @TicketModel.UpdatedOn</MudText>
                         <MudText Align="Align.Left"><b>Legutoljára frissítette:</b> @TicketModel.UpdatedBy</MudText>
-                        <MudText Align="Align.Left"><b>Kommentek száma:</b> 3</MudText>
-                    </MudPaper>
+                        <MudText Align="Align.Left"><b>Kommentek száma:</b> @TicketModel.Comments.Count(x=>x.Navigation==false)</MudText>
+
+                        @if(TicketModel.ParentId != null)
+                            {
+                          <MudLink Align="Align.Left" Href=@($"/tickets/{TicketModel.ParentId}")>Szülő ticket</MudLink>
+                            }
+                        </MudPaper>
                 </MudItem>
             </MudGrid>
         </MudItem>
@@ -56,25 +79,22 @@
         <MudItem xs="8">
             <MudText Typo="Typo.h6">Kommentek:</MudText>
 
-            <MudCard Outlined="true">
-                <MudCardContent>
-                    <MudText>Story of the day</MudText>
-                    <ContextMenuTrigger MenuId="myMenu">
-                    <MudText Typo="Typo.body2" onmouseup="@GetSelectedText">The quick, brown fox jumps over a lazy dog.</MudText>
-                    </ContextMenuTrigger>
-                </MudCardContent>
-            </MudCard>
+            @foreach (var comment in TicketModel.Comments.Where(x=>x.Navigation== false))
+            {
+                <MudCard Outlined="true">
+                    <MudCardContent>
+                        <MudText>Title</MudText>
+                        <ContextMenuTrigger MenuId="myMenu" Data="comment">
+                            <MudText Typo="Typo.body2" onmouseup="@GetSelectedText">@comment.Text</MudText>
+                        </ContextMenuTrigger>
+                    </MudCardContent>
+                </MudCard>
+            }
 
-            <MudCard Outlined="true">
-                <MudCardContent>
-                    <MudText>Story of the day</MudText>
-                    <MudText Typo="Typo.body2">The quick, brown fox jumps over a lazy dog.</MudText>
-                </MudCardContent>
-            </MudCard>
 
         </MudItem>
         <MudItem xs="4">
-            <MudText Typo="Typo.h6" GutterBottom="true">Icons with text</MudText>
+            <MudText Typo="Typo.h6" GutterBottom="true">Commitok</MudText>
             <MudPaper Width="100%">
                 <MudList Clickable=true Dense=true>
                     <MudListItem Text="Commit1" Icon="@Icons.Filled.Bookmark" />
@@ -88,17 +108,19 @@
 
 
 <ContextMenu Id="myMenu">
-    <Item OnClick="@OnClick">Item 1</Item>
-    <Item OnClick="@OnClick">Item 2</Item>
-    <Item OnClick="@OnClick" Enabled="false">Item 3 (disabled)</Item>
+    <Item OnClick="@CreateNewTicketFromHighligtedText">Új Ticket létrehozása</Item>
     <Seperator />
-    <Item>Submenu
+@*    <Item>
+        Submenu
         <SubMenu>
             <Item OnClick="@OnClick">Submenu Item 1</Item>
             <Item OnClick="@OnClick">Submenu Item 2</Item>
         </SubMenu>
-    </Item>
+    </Item>*@
 </ContextMenu>
+
+}
+
 
 
 
@@ -106,28 +128,67 @@
     [Parameter]
     public int? Id { get; set; }
 
+    public bool IsLoading { get; set; } = true;
+
     public string SelectedText { get; set; } = string.Empty;
 
     private TicketDTO TicketModel { get; set; } = new TicketDTO();
+
     private IEnumerable<TicketDTO> ChildrenTickets { get; set; } = new List<TicketDTO>();
+
+
+   private List<BreadcrumbItem> _items = new List<BreadcrumbItem>
+    {
+        new BreadcrumbItem("Jegyek", href: "/tickets"),
+        new BreadcrumbItem("Link 1", href: "#"),
+        new BreadcrumbItem("Link 2", href: "#")
+    };
 
     protected override async Task OnInitializedAsync()
     {
+        IsLoading = true;
         if (Id != null)
         {
             TicketModel = await TicketService.GetTicket(Id.Value);
             ChildrenTickets = await TicketService.GetChildrenTickets(Id.Value);
         }
+        IsLoading = false;
     }
 
-    void OnClick(ItemClickEventArgs e)
+    async Task CreateNewTicketFromHighligtedText(ItemClickEventArgs e)
     {
-        var literal = e.Data as string;
+        var comment = e.Data as CommentDTO;
         Console.WriteLine($"Kijelölt szöveg: {SelectedText}");
+
+        var newTicket = CreateNewCildTicketFromComment(comment);
+        var createdTicket = await TicketService.CreateTicket(newTicket);
+
+        NavigationManager.NavigateTo($"tickets/{createdTicket.Id}");
     }
 
     async Task GetSelectedText()
     {
         SelectedText = await JSRuntime.InvokeAsync<string>("getSelectedText");
+    }
+
+    TicketDTO CreateNewCildTicketFromComment(CommentDTO comment)
+    {
+        var titleLength = SelectedText.Length > 15 ? 15 : SelectedText.Length;
+        TicketDTO newTicket = new();
+        newTicket.Title = SelectedText.Substring(0,titleLength);
+        newTicket.Description = SelectedText;
+        newTicket.AssignedTo = "TempUser";
+        newTicket.ProjectId = TicketModel.ProjectId;
+        newTicket.ParentId = TicketModel.Id;
+        newTicket.Priority = "Alacsony";
+        newTicket.Status = "Nyitott";
+
+        CommentDTO navigationComment = new();
+        navigationComment.Navigation = true;
+        navigationComment.NavigationId = comment.Id;
+
+        newTicket.Comments.Add(navigationComment);
+
+        return newTicket;
     }
 }

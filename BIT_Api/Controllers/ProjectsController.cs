@@ -1,4 +1,6 @@
-﻿using BIT_Business.Repository.IRepository;
+﻿using AutoMapper;
+using BIT_Api.Managers;
+using BIT_DataAccess.Data;
 using BIT_Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,17 +10,18 @@ namespace BIT_Api.Controllers
     [ApiController]
     public class ProjectsController : ControllerBase
     {
-        private readonly IProjectRepository _projectRepository;
+        private ProjectManager projectManager;
 
-        public ProjectsController(IProjectRepository projectRepository)
+        public ProjectsController(ApplicationDbContext db, IMapper mapper)
         {
-            this._projectRepository = projectRepository;
+            projectManager = new ProjectManager(db, mapper);
         }
+
 
         [HttpGet]
         public async Task<IActionResult> GetAllProjects()
         {
-            var allProjects = await _projectRepository.GetAllProjects();
+            var allProjects = await projectManager.GetAllProjects();
             return Ok(allProjects);
         }
 
@@ -30,7 +33,7 @@ namespace BIT_Api.Controllers
                 return BadRequest(new ErrorModel() { Title = "", ErrorMessage = "Invalid Project Id", StatusCode = StatusCodes.Status400BadRequest });
             }
 
-            var ticket = await _projectRepository.GetProject(projectId.Value);
+            var ticket = await projectManager.GetProject(projectId.Value);
             if (ticket is null)
             {
                 return BadRequest(new ErrorModel() { Title = "", ErrorMessage = "Invalid Project Id", StatusCode = StatusCodes.Status404NotFound });
@@ -44,7 +47,7 @@ namespace BIT_Api.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _projectRepository.CreateProject(project);
+                var result = await projectManager.CreateProject(project);
                 return Ok(result);
             }
             else
@@ -61,7 +64,7 @@ namespace BIT_Api.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _projectRepository.UpdateProject(projectId,project);
+                var result = await projectManager.UpdateProject(projectId,project);
                 return Ok(result);
             }
             else
@@ -76,7 +79,7 @@ namespace BIT_Api.Controllers
         [HttpDelete]
         public async Task<IActionResult> Delete(int projectId)
         {
-            var response = await _projectRepository.DeleteProject(projectId);
+            var response = await projectManager.DeleteProject(projectId);
 
             if (response < 1)
             {

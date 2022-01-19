@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+    <PackageReference Include="Html2Markdown" Version="5.0.1.524" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.1">
       <PrivateAssets>all</PrivateAssets>
@@ -20,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BIT_Business\BIT_Business.csproj" />
     <ProjectReference Include="..\BIT_DataAccess\BIT_DataAccess.csproj" />
+    <ProjectReference Include="..\BIT_Models\BIT_Models.csproj" />
   </ItemGroup>
 
 </Project>

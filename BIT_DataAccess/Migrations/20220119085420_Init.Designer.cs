@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BIT_DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220117085311_FistMigration")]
-    partial class FistMigration
+    [Migration("20220119085420_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -57,6 +57,9 @@ namespace BIT_DataAccess.Migrations
                     b.Property<string>("CommitUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Navigation")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -93,31 +96,6 @@ namespace BIT_DataAccess.Migrations
                     b.HasIndex("FileId");
 
                     b.ToTable("CommentFiles");
-                });
-
-            modelBuilder.Entity("BIT_DataAccess.Data.CommentToTicket", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int?>("CommentId")
-                        .IsRequired()
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TicketId")
-                        .IsRequired()
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CommentId");
-
-                    b.HasIndex("TicketId");
-
-                    b.ToTable("CommentToTickets");
                 });
 
             modelBuilder.Entity("BIT_DataAccess.Data.File", b =>
@@ -262,25 +240,6 @@ namespace BIT_DataAccess.Migrations
                     b.Navigation("Comment");
 
                     b.Navigation("File");
-                });
-
-            modelBuilder.Entity("BIT_DataAccess.Data.CommentToTicket", b =>
-                {
-                    b.HasOne("BIT_DataAccess.Data.Comment", "Comment")
-                        .WithMany()
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BIT_DataAccess.Data.Ticket", "Ticket")
-                        .WithMany()
-                        .HasForeignKey("TicketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Comment");
-
-                    b.Navigation("Ticket");
                 });
 
             modelBuilder.Entity("BIT_DataAccess.Data.Ticket", b =>
